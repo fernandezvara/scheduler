@@ -82,7 +82,7 @@ func testDay(t *testing.T, job *Job, err error, date time.Time, hour, min, sec i
 
 	actual, err := job.schedule.nextRun()
 	assert.Nil(t, err)
-	runTime := time.Now().Add(actual)
+	runTime := time.Now().UTC().Add(actual)
 	assert.Equal(t, date.Day(), runTime.Day())
 	assert.Equal(t, date.Month(), runTime.Month())
 	assert.Equal(t, date.Year(), runTime.Year())
@@ -93,27 +93,27 @@ func testDay(t *testing.T, job *Job, err error, date time.Time, hour, min, sec i
 
 func TestEveryDay(t *testing.T) {
 	job, err := Every().Day().Run(test)
-	testDay(t, job, err, time.Now().AddDate(0, 0, 1), 0, 0, 0)
+	testDay(t, job, err, time.Now().UTC().AddDate(0, 0, 1), 0, 0, 0)
 }
 
 func TestEveryAtAfter(t *testing.T) {
-	tAdd := time.Now().Add(1 * time.Second)
+	tAdd := time.Now().UTC().Add(1 * time.Second)
 	h := tAdd.Hour()
 	m := tAdd.Minute()
 	s := tAdd.Second()
 	hourStr := fmt.Sprintf("%v:%v:%v", h, m, s)
 	job, err := Every().Day().At(hourStr).Run(test)
-	testDay(t, job, err, time.Now(), h, m, s)
+	testDay(t, job, err, time.Now().UTC(), h, m, s)
 }
 
 func TestEveryAtBefore(t *testing.T) {
-	tAdd := time.Now().Add(-1 * time.Second)
+	tAdd := time.Now().UTC().Add(-1 * time.Second)
 	h := tAdd.Hour()
 	m := tAdd.Minute()
 	s := tAdd.Second()
 	hourStr := fmt.Sprintf("%v:%v:%v", h, m, s)
 	job, err := Every().Day().At(hourStr).Run(test)
-	testDay(t, job, err, time.Now().AddDate(0, 0, 1), h, m, s)
+	testDay(t, job, err, time.Now().UTC().AddDate(0, 0, 1), h, m, s)
 }
 
 func TestEveryAtHour(t *testing.T) {
@@ -122,7 +122,7 @@ func TestEveryAtHour(t *testing.T) {
 	assert.Nil(t, err)
 	actual, err := job.schedule.nextRun()
 	assert.Nil(t, err)
-	runTime := time.Now().Add(actual)
+	runTime := time.Now().UTC().Add(actual)
 	assert.Equal(t, 8, runTime.Hour())
 	assert.Equal(t, 0, runTime.Minute())
 	assert.Equal(t, 0, runTime.Second())
@@ -134,7 +134,7 @@ func TestEveryAtHourMin(t *testing.T) {
 	assert.Nil(t, err)
 	actual, err := job.schedule.nextRun()
 	assert.Nil(t, err)
-	runTime := time.Now().Add(actual)
+	runTime := time.Now().UTC().Add(actual)
 	assert.Equal(t, 8, runTime.Hour())
 	assert.Equal(t, 30, runTime.Minute())
 	assert.Equal(t, 0, runTime.Second())
@@ -143,7 +143,7 @@ func TestEveryAtHourMin(t *testing.T) {
 func testWeekday(t *testing.T, job *Job, weekday time.Weekday) {
 	actual, err := job.schedule.nextRun()
 	assert.Nil(t, err)
-	runTime := time.Now().Add(actual)
+	runTime := time.Now().UTC().Add(actual)
 	assert.Equal(t, weekday, runTime.Weekday())
 	assert.Equal(t, 0, runTime.Hour())
 	assert.Equal(t, 0, runTime.Minute())
@@ -152,7 +152,7 @@ func testWeekday(t *testing.T, job *Job, weekday time.Weekday) {
 }
 
 func TestEveryAtWeeklyAfter(t *testing.T) {
-	tAdd := time.Now().Add(1 * time.Second)
+	tAdd := time.Now().UTC().Add(1 * time.Second)
 	h := tAdd.Hour()
 	m := tAdd.Minute()
 	s := tAdd.Second()
@@ -161,7 +161,7 @@ func TestEveryAtWeeklyAfter(t *testing.T) {
 	assert.Nil(t, err)
 	actual, err := job.schedule.nextRun()
 	assert.Nil(t, err)
-	runTime := time.Now().Add(actual)
+	runTime := time.Now().UTC().Add(actual)
 	assert.Equal(t, time.Monday, runTime.Weekday())
 	assert.Equal(t, h, runTime.Hour())
 	assert.Equal(t, m, runTime.Minute())
@@ -169,7 +169,7 @@ func TestEveryAtWeeklyAfter(t *testing.T) {
 }
 
 func TestEveryAtWeeklyBefore(t *testing.T) {
-	tAdd := time.Now().Add(-1 * time.Second)
+	tAdd := time.Now().UTC().Add(-1 * time.Second)
 	h := tAdd.Hour()
 	m := tAdd.Minute()
 	s := tAdd.Second()
@@ -178,7 +178,7 @@ func TestEveryAtWeeklyBefore(t *testing.T) {
 	assert.Nil(t, err)
 	actual, err := job.schedule.nextRun()
 	assert.Nil(t, err)
-	runTime := time.Now().Add(actual)
+	runTime := time.Now().UTC().Add(actual)
 	assert.Equal(t, time.Monday, runTime.Weekday())
 	assert.Equal(t, h, runTime.Hour())
 	assert.Equal(t, m, runTime.Minute())
