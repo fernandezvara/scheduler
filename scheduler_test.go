@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -335,4 +336,47 @@ func TestBadRecurrent(t *testing.T) {
 	job, err := Every(units).Seconds().Run(test)
 	assert.Nil(t, job)
 	assert.NotNil(t, err)
+}
+
+func TestJobErr(t *testing.T) {
+	job := Every(1).Seconds()
+	assert.NotNil(t, job)
+	job.err = errors.New("some random error")
+	job1, err := job.Run(test)
+	assert.NotNil(t, err)
+	assert.Nil(t, job1)
+}
+
+func TestJobErrWithArgs(t *testing.T) {
+	f := func(args []string) {
+	}
+	job := Every(1).Seconds()
+	assert.NotNil(t, job)
+	job.err = errors.New("some random error")
+	job1, err := job.RunWithArgs(f, []string{"a"})
+	assert.NotNil(t, err)
+	assert.Nil(t, job1)
+}
+
+func TestExecutionWithArgs(t *testing.T) {
+	chan0 := make(chan string)
+	chan1 := make(chan string)
+	fn := func(args []string) {
+		chan0 <- args[0]
+		chan1 <- args[1]
+	}
+
+	job, err := Every(1).Seconds().RunWithArgs(fn, []string{"aaa", "bbb"})
+	assert.Nil(t, err)
+	assert.NotNil(t, job)
+	assert.Len(t, job.args, 2)
+
+	select {
+	case a1 := <-chan0:
+		assert.Equal(t, "aaa", a1)
+	case a2 := <-chan1:
+		assert.Equal(t, "bbb", a2)
+	case <-time.After(2 * time.Second):
+		t.Error("Didn't Execute")
+	}
 }

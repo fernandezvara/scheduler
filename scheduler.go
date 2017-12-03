@@ -29,6 +29,8 @@ type scheduled interface {
 // Job defines a running job and allows to stop a scheduled job or run it.
 type Job struct {
 	fn        func()
+	fni       func(args []string)
+	args      []string
 	Quit      chan bool
 	SkipWait  chan bool
 	err       error
@@ -161,12 +163,29 @@ func (j *Job) Run(f func()) (*Job, error) {
 	if j.err != nil {
 		return nil, j.err
 	}
-	var next time.Duration
-	var err error
 	j.Quit = make(chan bool, 1)
 	j.SkipWait = make(chan bool, 1)
 	j.fn = f
+	return j.startLoop()
+}
+
+// RunWithArgs sets the job to the schedule and returns the pointer to the job so it may be
+// stopped or executed without waiting or an error.
+func (j *Job) RunWithArgs(f func(args []string), args []string) (*Job, error) {
+	if j.err != nil {
+		return nil, j.err
+	}
+	j.Quit = make(chan bool, 1)
+	j.SkipWait = make(chan bool, 1)
+	j.fni = f
+	j.args = args
 	// Check for possible errors in scheduling
+	return j.startLoop()
+}
+
+func (j *Job) startLoop() (*Job, error) {
+	var next time.Duration
+	var err error
 	next, err = j.schedule.nextRun()
 	if err != nil {
 		return nil, err
@@ -199,7 +218,11 @@ func runJob(job *Job) {
 		return
 	}
 	job.setRunning(true)
-	job.fn()
+	if len(job.args) > 0 {
+		job.fni(job.args)
+	} else {
+		job.fn()
+	}
 	job.setRunning(false)
 }
 
