@@ -3,6 +3,7 @@
 [![Build status](https://img.shields.io/github/workflow/status/fernandezvara/scheduler/ci?style=for-the-badge)](https://github.com/fernandezvara/scheduler/actions?workflow=ci)
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=for-the-badge)](https://pkg.go.dev/github.com/fernandezvara/scheduler)
 [![Coveralls github](https://img.shields.io/coveralls/github/fernandezvara/scheduler?style=for-the-badge)](https://coveralls.io/github/fernandezvara/scheduler)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](/LICENSE)
 
 Job scheduling made easy.
 
