@@ -30,6 +30,44 @@ func TestIsRunning(t *testing.T) {
 	assert.Equal(t, false, job.IsRunning())
 }
 
+func TestRunNow(t *testing.T) {
+
+	var isRunning bool
+
+	fn := func() {
+		isRunning = true
+		time.Sleep(3 * time.Second)
+	}
+
+	job, err := Every(1).Minutes().Run(fn)
+	assert.Nil(t, err)
+	assert.NotNil(t, job)
+
+	job.RunNow(fn)
+	time.Sleep(1 * time.Second)
+	assert.True(t, isRunning)
+	assert.True(t, job.IsRunning())
+	time.Sleep(3 * time.Second)
+	assert.False(t, job.IsRunning())
+
+	var result string
+
+	fn2 := func(args []string) {
+		for _, arg := range args {
+			result = arg
+			time.Sleep(1 * time.Second)
+		}
+	}
+
+	job.RunNowWithArgs(fn2, []string{"a", "b", "c"})
+	time.Sleep(1 * time.Second)
+	assert.True(t, job.IsRunning())
+	time.Sleep(3 * time.Second)
+	assert.False(t, job.IsRunning())
+	assert.Equal(t, result, "c")
+
+}
+
 func TestExecution(t *testing.T) {
 	c := make(chan bool)
 	fn := func() {

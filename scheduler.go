@@ -35,6 +35,7 @@ type Job struct {
 	SkipWait  chan bool
 	err       error
 	schedule  scheduled
+	NextRun   time.Time
 	isRunning bool
 	sync.RWMutex
 }
@@ -183,10 +184,24 @@ func (j *Job) RunWithArgs(f func(args []string), args []string) (*Job, error) {
 	return j.startLoop()
 }
 
+// RunNow runs a job one time immediately.
+func (j *Job) RunNow(f func()) {
+	j.fn = f
+	go runJob(j)
+}
+
+// RunNowWithArgs runs a job one time immediately.
+func (j *Job) RunNowWithArgs(f func(args []string), args []string) {
+	j.fni = f
+	j.args = args
+	go runJob(j)
+}
+
 func (j *Job) startLoop() (*Job, error) {
 	var next time.Duration
 	var err error
 	next, err = j.schedule.nextRun()
+	j.NextRun = time.Now().Add(next)
 	if err != nil {
 		return nil, err
 	}
@@ -201,6 +216,7 @@ func (j *Job) startLoop() (*Job, error) {
 				go runJob(j)
 			}
 			next, _ = j.schedule.nextRun()
+			j.NextRun = time.Now().Add(next)
 		}
 	}(j)
 	return j, nil
